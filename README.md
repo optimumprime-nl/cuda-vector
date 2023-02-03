@@ -29,4 +29,4 @@ CudaAlgVector2D
 
 ### Next features
 
-Integration with `std::vector`, iterators, capacity are not yet implemented.
+Integration with `std::vector`, iterators, capacity are not yet implemented. See Projects tab for more.
