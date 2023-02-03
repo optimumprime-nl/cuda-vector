@@ -16,7 +16,7 @@ There are 2 types of container available:
 2. `CudaAlgVectorXD` for aligned memory accesses.
 
 Where `X` (Dimension) can either be 1, 2, or 3.
-Every memory operation is carried out on the `host` code, and each of those classes has a `device` counterpart that can access the memory on the GPU.
+Object creation is carried out on the host, and for each class there is a GPU counterpart that can access the memory on the device.
 Check out `Test.cu` to see example usages.
 
 Nsight Compute metrics for memory ops on `CudaVector2D` and `CudaAlgVector2D` (taken from the example available in `Test.cu`):
