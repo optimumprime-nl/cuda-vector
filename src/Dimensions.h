@@ -177,7 +177,7 @@ HOST_ONLY cuda::Dim2_Aligned::Dim2_Aligned(unsigned int x, unsigned int y, int s
     , stride_(cuda::ComputeStride(y, sizeOfType))
     , length_(x * y)
 #ifdef _DEBUG
-    , wastedBytes_(x * stride_)
+    , wastedBytes_(x * stride_ * sizeOfType)
 #endif
 {
 }
@@ -213,7 +213,7 @@ HOST_ONLY cuda::Dim3_Aligned::Dim3_Aligned(unsigned int x, unsigned int y, unsig
     , stride_(cuda::ComputeStride(y, sizeOfType))
     , length_(x * y * z)
 #ifdef _DEBUG
-    , wastedBytes_(x * z * stride_)
+    , wastedBytes_(x * z * stride_ * sizeOfType)
 #endif
 {
 }
