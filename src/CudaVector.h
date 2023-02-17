@@ -92,9 +92,7 @@ namespace cuda {
         HOST_ONLY INLINE unsigned int Y() const { return dimension_.y_; };
         HOST_ONLY INLINE unsigned int Stride() const { return dimension_.stride_; };
         HOST_ONLY INLINE unsigned int Length() const { return dimension_.length_; };
-#ifdef _DEBUG
         HOST_ONLY INLINE unsigned int WastedBytes() const { return dimension_.wastedBytes_; };
-#endif
     };
 
     // 3D Vector Aligned
@@ -116,9 +114,7 @@ namespace cuda {
         HOST_ONLY INLINE unsigned int Z() const { return dimension_.z_; };
         HOST_ONLY INLINE unsigned int Stride() const { return dimension_.stride_; };
         HOST_ONLY INLINE unsigned int Length() const { return dimension_.length_; };
-#ifdef _DEBUG
         HOST_ONLY INLINE unsigned int WastedBytes() const { return dimension_.wastedBytes_; };
-#endif
     };
 
 

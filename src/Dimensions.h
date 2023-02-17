@@ -63,9 +63,7 @@ namespace cuda
         unsigned int y_;
         unsigned int stride_;   // Row stride to garantee memory alignment on the device (measured in number of elements of type Type)
         unsigned int length_;   // Number of actual elements in the vector (differs from size_)
-#ifdef _DEBUG
         unsigned int wastedBytes_;
-#endif
     };
 
     struct Dim3_Aligned
@@ -87,9 +85,7 @@ namespace cuda
         unsigned int z_;
         unsigned int stride_;   // Row stride to garantee memory alignment on the device (measured in number of elements of type Type)
         unsigned int length_;   // Number of actual elements in the vector (differs from size_)
-#ifdef _DEBUG
         unsigned int wastedBytes_;
-#endif
     };
 
 } // cuda
@@ -176,9 +172,7 @@ HOST_ONLY cuda::Dim2_Aligned::Dim2_Aligned(unsigned int x, unsigned int y, int s
     , y_(y)
     , stride_(cuda::ComputeStride(y, sizeOfType))
     , length_(x * y)
-#ifdef _DEBUG
     , wastedBytes_(x * stride_ * sizeOfType)
-#endif
 {
 }
 
@@ -189,10 +183,7 @@ HOST_ONLY unsigned int cuda::Dim2_Aligned::Unroll() const
 
 HOST_ONLY void cuda::Dim2_Aligned::Clear()
 {
-    x_ = y_ = stride_ = length_ = 0;
-#ifdef _DEBUG
-    wastedBytes_ = 0;
-#endif
+    x_ = y_ = stride_ = length_ = wastedBytes_ = 0;
 }
 
 HOST_DEVICE bool cuda::Dim2_Aligned::operator==(const Dim2_Aligned& other) const
@@ -212,9 +203,7 @@ HOST_ONLY cuda::Dim3_Aligned::Dim3_Aligned(unsigned int x, unsigned int y, unsig
     , z_(z)
     , stride_(cuda::ComputeStride(y, sizeOfType))
     , length_(x * y * z)
-#ifdef _DEBUG
     , wastedBytes_(x * z * stride_ * sizeOfType)
-#endif
 {
 }
 
@@ -225,10 +214,7 @@ HOST_ONLY unsigned int cuda::Dim3_Aligned::Unroll() const
 
 HOST_ONLY void cuda::Dim3_Aligned::Clear()
 {
-    x_ = y_ = z_ = stride_ = length_ = 0;
-#ifdef _DEBUG
-    wastedBytes_ = 0;
-#endif
+    x_ = y_ = z_ = stride_ = length_ = wastedBytes_ = 0;
 }
 
 HOST_DEVICE bool cuda::Dim3_Aligned::operator==(const Dim3_Aligned& other) const

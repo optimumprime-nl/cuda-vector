@@ -53,7 +53,8 @@ void SmallExample()
 
 // ================= EXAMPLE 2: Unoptimized vs Optimized (aligned) =========================
 
-typedef float Real;
+typedef float Real; 
+
 
 struct Params
 {
@@ -91,8 +92,8 @@ __global__ void SimulationKernel(
 void Simulation()
 {
     // Init parameters
-    const int simulationDates = 5000;
-    const int numberOfPaths = 100001;
+    const int simulationDates = 7000;
+    const int numberOfPaths = 100005;
     Params params;
     params.T = static_cast<Real>(1);
     params.dt = static_cast<Real>(params.T / simulationDates);
@@ -100,29 +101,27 @@ void Simulation()
     params.sigma = static_cast<Real>(0.25);
     params.r = static_cast<Real>(0.05);
 
-    // Misaligned version
-    CudaVector2D<Real> stockPrice({ simulationDates , numberOfPaths });
-    CudaVector2D<Real> randoms({ simulationDates - 1, numberOfPaths });
-
-    // Aligned version
-    CudaAlgVector2D<Real> stockPriceOpt({ simulationDates , numberOfPaths, sizeof(Real) });
-    CudaAlgVector2D<Real> randomsOpt({ simulationDates - 1, numberOfPaths, sizeof(Real) });
-
     // Init randoms
     std::default_random_engine defaultEngine{ static_cast<long unsigned int>(123) };
     std::normal_distribution<Real> dist(0.0, 1.0);
     auto gen = [&dist, &defaultEngine]() { return dist(defaultEngine); };
-    std::vector<Real> normals(randomsOpt.Size());
+    std::vector<Real> normals((simulationDates - 1 + 32) * numberOfPaths);
     std::generate(std::begin(normals), std::end(normals), gen);
-    CC(cudaMemcpy(randoms.Data(), normals.data(), randoms.Size() * sizeof(Real), cudaMemcpyHostToDevice));
-    CC(cudaMemcpy(randomsOpt.Data(), normals.data(), randomsOpt.Size() * sizeof(Real), cudaMemcpyHostToDevice));
+    
 
     // Get times for both versions
     cudaDeviceProp props;
     cudaGetDeviceProperties(&props, 0);
     std::chrono::steady_clock::time_point tic, toc;
     std::chrono::duration<double> time;
+
+    // Misaligned version
     {
+        CudaVector2D<Real> stockPrice({ simulationDates , numberOfPaths });
+        CudaVector2D<Real> randoms({ simulationDates - 1, numberOfPaths });
+
+        CC(cudaMemcpy(randoms.Data(), normals.data(), randoms.Size() * sizeof(Real), cudaMemcpyHostToDevice));
+
         CC(cudaDeviceSynchronize());
         tic = std::chrono::steady_clock::now();
         SimulationKernel<CudaVector2DKernel<Real>> << < props.multiProcessorCount * 12, 128 >> > (
@@ -135,7 +134,13 @@ void Simulation()
         time = toc - tic;
         std::cout << "Misaligned version time: " << time.count() << "s\n";
     }
+
+    // Aligned version
     {
+        CudaAlgVector2D<Real> stockPriceOpt({ simulationDates , numberOfPaths, sizeof(Real) });
+        CudaAlgVector2D<Real> randomsOpt({ simulationDates - 1, numberOfPaths, sizeof(Real) });
+        CC(cudaMemcpy(randomsOpt.Data(), normals.data(), randomsOpt.Size() * sizeof(Real), cudaMemcpyHostToDevice));
+
         CC(cudaDeviceSynchronize());
         tic = std::chrono::steady_clock::now();
         SimulationKernel<CudaAlgVector2DKernel<Real>> << < props.multiProcessorCount * 12, 128 >> > (params,
@@ -147,12 +152,9 @@ void Simulation()
         time = toc - tic;
         std::cout << "Aligned version time: " << time.count() << "s\n";
         std::cout << "Stride: " << stockPriceOpt.Stride() << std::endl;
-#ifdef _DEBUG
         std::cout << "Wasted KB: " << stockPriceOpt.WastedBytes() / 1e3 << std::endl;
-#endif
     }
 }
-
 
 
 int main()
